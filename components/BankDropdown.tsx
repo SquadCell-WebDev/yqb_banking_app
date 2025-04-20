@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import Image from "next/image";
-import { useSearchParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import Image from "next/image"
+import { useSearchParams, useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 
 import {
   Select,
@@ -11,37 +11,58 @@ import {
   SelectItem,
   SelectLabel,
   SelectTrigger,
-} from "@/components/ui/select";
-import { formUrlQuery, formatAmount } from "@/lib/utils";
+} from "@/components/ui/select"
+import { formUrlQuery, formatAmount } from "@/lib/utils"
+
+const dummyAccount: Account = {
+  id: "default",
+  name: "Demo Account",
+  currentBalance: 1000,
+  appwriteItemId: "default-account-id",
+  type: "savings",
+  institutionName: "Mock Bank",
+  accountNumber: "000000000",
+}
 
 export const BankDropdown = ({
-  accounts = [],
+  accounts = [dummyAccount],
   setValue,
   otherStyles,
 }: BankDropdownProps) => {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const [selected, setSeclected] = useState(accounts[0]);
+  const searchParams = useSearchParams()
+  const router = useRouter()
+
+  const [selected, setSelected] = useState<Account | null>(null)
+
+  useEffect(() => {
+    if (accounts.length > 0) {
+      setSelected(accounts[0])
+    }
+  }, [accounts])
 
   const handleBankChange = (id: string) => {
-    const account = accounts.find((account) => account.appwriteItemId === id)!;
+    const account = accounts.find((account) => account.appwriteItemId === id)
 
-    setSeclected(account);
+    if (!account) return
+    setSelected(account)
+
     const newUrl = formUrlQuery({
       params: searchParams.toString(),
       key: "id",
       value: id,
-    });
-    router.push(newUrl, { scroll: false });
+    })
+    router.push(newUrl, { scroll: false })
 
     if (setValue) {
-      setValue("senderBank", id);
+      setValue("senderBank", id)
     }
-  };
+  }
+
+  if (!selected) return null // or a loading spinner
 
   return (
     <Select
-      defaultValue={selected.id}
+      defaultValue={selected.appwriteItemId}
       onValueChange={(value) => handleBankChange(value)}
     >
       <SelectTrigger
@@ -69,7 +90,7 @@ export const BankDropdown = ({
               value={account.appwriteItemId}
               className="cursor-pointer border-t"
             >
-              <div className="flex flex-col ">
+              <div className="flex flex-col">
                 <p className="text-16 font-medium">{account.name}</p>
                 <p className="text-14 font-medium text-blue-600">
                   {formatAmount(account.currentBalance)}
@@ -80,5 +101,5 @@ export const BankDropdown = ({
         </SelectGroup>
       </SelectContent>
     </Select>
-  );
-};
+  )
+}
