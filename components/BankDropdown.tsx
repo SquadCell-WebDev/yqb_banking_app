@@ -20,8 +20,13 @@ const dummyAccount: Account = {
   currentBalance: 1000,
   appwriteItemId: "default-account-id",
   type: "savings",
-  institutionName: "Mock Bank",
+  institutionId: "Mock Bank",
   accountNumber: "000000000",
+  availableBalance: 0,
+  officialName: "",
+  mask: "",
+  subtype: "",
+  shareableId: ""
 }
 
 export const BankDropdown = ({
