@@ -126,7 +126,15 @@ const dummyTransactions: Transaction[] = [
     date: new Date().toISOString(),
     type: 'debit',
     category: 'Groceries',
-    paymentChannel: 'card'
+    paymentChannel: 'card',
+    $id: "",
+    accountId: "",
+    pending: false,
+    image: "",
+    $createdAt: "",
+    channel: "",
+    senderBankId: "",
+    receiverBankId: ""
   },
   {
     id: '2',
@@ -135,7 +143,15 @@ const dummyTransactions: Transaction[] = [
     date: new Date().toISOString(),
     type: 'credit',
     category: 'Income',
-    paymentChannel: 'bank'
+    paymentChannel: 'bank',
+    $id: "",
+    accountId: "",
+    pending: false,
+    image: "",
+    $createdAt: "",
+    channel: "",
+    senderBankId: "",
+    receiverBankId: ""
   },
   {
     id: '3',
@@ -144,7 +160,15 @@ const dummyTransactions: Transaction[] = [
     date: new Date().toISOString(),
     type: 'debit',
     category: 'Entertainment',
-    paymentChannel: 'card'
+    paymentChannel: 'card',
+    $id: "",
+    accountId: "",
+    pending: false,
+    image: "",
+    $createdAt: "",
+    channel: "",
+    senderBankId: "",
+    receiverBankId: ""
   }
 ]
 
