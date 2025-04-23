@@ -3,7 +3,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { useState } from 'react'
-
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -24,77 +23,95 @@ import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { getLoggedInUser, signIn, signUp } from '@/lib/actions/user.actions';
 import PlaidLink from './PlaidLink';
+import { useToast } from '@/hooks/use-toast';
 
 const AuthForm = ({ type }: { type: string }) => {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const formSchema = authFormSchema(type);
 
-    // 1. Define your form.
-    const form = useForm<z.infer<typeof formSchema>>({
-      resolver: zodResolver(formSchema),
-      defaultValues: type === 'sign-up'
-        ? {
-            firstName: '',
-            lastName: '',
-            address1: '',
-            city: '',
-            state: '',
-            postalCode: '',
-            dateOfBirth: '',
-            ssn: '',
-            email: '',
-            password: ''
-          }
-        : {
-            email: '',
-            password: ''
-          }
-    });
-    
-   
-    // 2. Define a submit handler.
-    const onSubmit = async (data: z.infer<typeof formSchema>) => {
-      setIsLoading(true);
+  // 1. Define your form.
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: type === 'sign-up'
+      ? {
+          firstName: '',
+          lastName: '',
+          address1: '',
+          city: '',
+          state: '',
+          postalCode: '',
+          dateOfBirth: '',
+          ssn: '',
+          email: '',
+          password: ''
+        }
+      : {
+          email: '',
+          password: ''
+        }
+  });
+  
+  // 2. Define a submit handler.
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    setIsLoading(true);
 
-      try {
-        // Sign up with Appwrite & create plaid token
-        
-        if(type === 'sign-up') {
-          const userData = {
-            firstName: data.firstName!,
-            lastName: data.lastName!,
-            address1: data.address1!,
-            city: data.city!,
-            state: data.state!,
-            postalCode: data.postalCode!,
-            dateOfBirth: data.dateOfBirth!,
-            ssn: data.ssn!,
-            email: data.email,
-            password: data.password
-          }
+    try {
+      if(type === 'sign-up') {
+        const userData = {
+          firstName: data.firstName!,
+          lastName: data.lastName!,
+          address1: data.address1!,
+          city: data.city!,
+          state: data.state!,
+          postalCode: data.postalCode!,
+          dateOfBirth: data.dateOfBirth!,
+          ssn: data.ssn!,
+          email: data.email,
+          password: data.password
+        }
 
-          const newUser = await signUp(userData);
+        const newUser = await signUp(userData);
 
+        if (newUser) {
           setUser(newUser);
+          toast({
+            title: "Success",
+            description: "Account created successfully! You can now link your account.",
+          });
         }
-
-        if(type === 'sign-in') {
-          const response = await signIn({
-            email: data.email,
-            password: data.password,
-          })
-
-          if(response) router.push('/')
-        }
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setIsLoading(false);
       }
+
+      if(type === 'sign-in') {
+        const response = await signIn({
+          email: data.email,
+          password: data.password,
+        })
+
+        if(response) {
+          router.push('/')
+        } else {
+          toast({
+            title: "Error",
+            description: "You don't have an account. Please sign up first.",
+            variant: "destructive",
+          });
+        }
+      }
+    } catch (error: any) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: error.message || "An error occurred during authentication. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
+  }
 
   return (
     <section className="auth-form">
@@ -107,6 +124,7 @@ const AuthForm = ({ type }: { type: string }) => {
               alt="Horizon logo"
             />
             <h1 className="text-26 font-ibm-plex-serif font-bold text-black-1">Horizon</h1>
+unding: none;
           </Link>
 
           <div className="flex flex-col gap-1 md:gap-3">
