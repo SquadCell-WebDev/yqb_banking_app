@@ -4,20 +4,18 @@ import RightSidebar from '@/components/RightSidebar';
 import TotalBalanceBox from '@/components/TotalBalanceBox';
 import { getAccount, getAccounts } from '@/lib/actions/bank.actions';
 import { getLoggedInUser } from '@/lib/actions/user.actions';
-
+import { dummyAccounts,dummyTransactions } from '@/lib/dummyData';
 const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
   const currentPage = Number(page as string) || 1;
   const loggedIn = await getLoggedInUser();
-  const accounts = await getAccounts({ 
-    userId: loggedIn.$id 
-  })
 
-  if(!accounts) return;
-  
-  const accountsData = accounts?.data;
+  const accounts = await getAccounts({ userId: loggedIn.$id });
+  const accountsData = accounts?.data?.length ? accounts.data : dummyAccounts;
+
   const appwriteItemId = (id as string) || accountsData[0]?.appwriteItemId;
-
-  const account = await getAccount({ appwriteItemId })
+  const account = accounts?.data?.length
+    ? await getAccount({ appwriteItemId })
+    : { transactions: dummyTransactions };
 
   return (
     <section className="home">
@@ -32,8 +30,8 @@ const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
 
           <TotalBalanceBox 
             accounts={accountsData}
-            totalBanks={accounts?.totalBanks}
-            totalCurrentBalance={accounts?.totalCurrentBalance}
+            totalBanks={accounts?.totalBanks || 1}
+            totalCurrentBalance={accounts?.totalCurrentBalance || 12345}
           />
         </header>
 
@@ -54,4 +52,4 @@ const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
   )
 }
 
-export default Home
+export default Home;

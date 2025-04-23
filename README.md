@@ -731,41 +731,39 @@ import { getTransactionsByBankId } from "./transaction.actions";
 import { getBanks, getBank } from "./user.actions";
 
 // Get multiple bank accounts
-export const getAccounts = async ({ userId }: getAccountsProps) => {
-  try {
-    // get banks from db
-    const banks = await getBanks({ userId });
+const accounts = (await Promise.all(
+  banks?.map(async (bank: Bank) => {
+    try {
+      const res = await plaidClient.accountsGet({
+        access_token: bank.accessToken,
+      });
 
-    const accounts = await Promise.all(
-      banks?.map(async (bank: Bank) => {
-        // get each account info from plaid
-        const accountsResponse = await plaidClient.accountsGet({
-          access_token: bank.accessToken,
-        });
-        const accountData = accountsResponse.data.accounts[0];
+      if (!res.data.accounts.length) return [];
 
-        // get institution info from plaid
-        const institution = await getInstitution({
-          institutionId: accountsResponse.data.item.institution_id!,
-        });
+      const institutionId = res.data.item.institution_id;
+      if (!institutionId) return [];
 
-        const account = {
-          id: accountData.account_id,
-          availableBalance: accountData.balances.available!,
-          currentBalance: accountData.balances.current!,
-          institutionId: institution.institution_id,
-          name: accountData.name,
-          officialName: accountData.official_name,
-          mask: accountData.mask!,
-          type: accountData.type as string,
-          subtype: accountData.subtype! as string,
-          appwriteItemId: bank.$id,
-          sharableId: bank.sharableId,
-        };
+      const institution = await getInstitution({ institutionId });
 
-        return account;
-      })
-    );
+      return res.data.accounts.map((accountData) => ({
+        id: accountData.account_id,
+        availableBalance: accountData.balances.available ?? 0,
+        currentBalance: accountData.balances.current ?? 0,
+        institutionId: institution.institution_id,
+        name: accountData.name,
+        officialName: accountData.official_name,
+        mask: accountData.mask ?? '',
+        type: accountData.type,
+        subtype: accountData.subtype ?? '',
+        appwriteItemId: bank.$id,
+        sharableId: bank.sharableId,
+      }));
+    } catch (error) {
+      console.error('Error fetching account for bank:', bank.$id, error);
+      return [];
+    }
+  })
+)).flat();
 
     const totalBanks = accounts.length;
     const totalCurrentBalance = accounts.reduce((total, account) => {
