@@ -124,7 +124,6 @@ const AuthForm = ({ type }: { type: string }) => {
               alt="newbankX2 logo"
             />
             <h1 className="text-26 font-ibm-plex-serif font-bold text-black-1">NeoBankX</h1>
-unding: none;
           </Link>
 
           <div className="flex flex-col gap-1 md:gap-3">
